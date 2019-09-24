@@ -1,0 +1,3 @@
+.ssh:
+  - config
+  - known_hosts
