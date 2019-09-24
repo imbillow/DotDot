@@ -2,9 +2,17 @@ use std::{env, fs};
 use std::error::Error;
 use std::path::Path;
 
+use serde::{Deserialize, Serialize};
+
+struct PathTree {
+    children: Vec<PathTree>,
+    path: String,
+}
+
 fn main() -> Result<(), Box<dyn Error>> {
-    let home = env::var("HOME")?;
-    list_dir(String::from(home));
+//    let home = env::var("HOME")?;
+//    list_dir(String::from(home));
+
     Ok(())
 }
 
