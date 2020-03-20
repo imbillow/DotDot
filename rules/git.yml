@@ -1,1 +1,3 @@
-~: .gitconfig
+current: ~
+children:
+  - current: .gitconfig
