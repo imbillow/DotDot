@@ -57,5 +57,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     log::set_max_level(LevelFilter::Info);
 
     rule::resolve(Path::new("rules/git.yml"));
+    let p = Path::new("~");
+    println!("{:?}", fs::canonicalize("~"));
     Ok(())
 }

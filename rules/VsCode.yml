@@ -1,3 +1,4 @@
-.config/Code/User:
-  - settings.json
-  - snippets
+current: .config/Code/User
+children:
+  - current: settings.json
+  - current: snippets
