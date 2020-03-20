@@ -1,3 +1,6 @@
-.ssh:
-  - config
-  - known_hosts
+current: ~
+children:
+  - current: .ssh:
+    children:
+      - current: config
+      - current: known_hosts
