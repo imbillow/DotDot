@@ -1,4 +1,4 @@
 root: .config/Code/User
 include:
   - settings.json
-  - snippets
+  - snippets/

@@ -1,4 +1,4 @@
-use log::{Level, Metadata, Record};
+use log::{Metadata, Record};
 
 pub struct ConsoleLogger;
 
@@ -9,7 +9,13 @@ impl log::Log for ConsoleLogger {
 
     fn log(&self, record: &Record) {
         if self.enabled(record.metadata()) {
-            println!("{} - {}", record.level(), record.args());
+            println!(
+                "{}:{}:{} - {}",
+                record.level(),
+                record.file().unwrap(),
+                record.line().unwrap(),
+                record.args(),
+            );
         }
     }
 

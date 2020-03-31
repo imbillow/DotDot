@@ -1,0 +1,5 @@
+rules_dir:
+  - test-rules
+data_directory: ~/dotfile
+force: true
+verbose: 1

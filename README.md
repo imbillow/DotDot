@@ -6,7 +6,7 @@ Resolve rule file like:
 
 git.yml
 ```yml
-.gitconfig
+root: .gitconfig
 ```
 
 to `~/.gitconfig`
