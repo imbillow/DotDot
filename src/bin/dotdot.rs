@@ -1,10 +1,10 @@
 use std::error::Error;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::{env, fs, path};
 
 use clap::{App, Arg, ArgMatches};
 use dotdot::logger::ConsoleLogger;
-use dotdot::rule;
+use dotdot::rule::Rule;
 use log::{Level, LevelFilter};
 use serde::{Deserialize, Serialize};
 
@@ -56,8 +56,14 @@ fn main() -> Result<(), Box<dyn Error>> {
     log::set_boxed_logger(Box::new(ConsoleLogger));
     log::set_max_level(LevelFilter::Info);
 
-    rule::resolve(Path::new("rules/git.yml"));
-    let p = Path::new("~");
-    println!("{:?}", fs::canonicalize("~"));
+    let rule_dir = PathBuf::from("rules");
+    for entry in rule_dir.read_dir().expect("failed read rule dir") {
+        if let Ok(entry) = entry {
+            println!("{:?}", entry.path());
+            let rule = Rule::new(&entry.path());
+            println!("{:?}", rule.resolve());
+        }
+    }
+
     Ok(())
 }

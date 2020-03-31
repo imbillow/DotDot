@@ -1,4 +1,4 @@
-current: .ssh
-children:
-    - current: config
-    - current: known_hosts
+root: ~/.ssh
+includes:
+  - config
+  - known_hosts

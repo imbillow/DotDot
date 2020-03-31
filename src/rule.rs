@@ -8,32 +8,40 @@ use std::path::{Path, PathBuf};
 use std::{env, fs};
 
 #[derive(Debug, Deserialize, Serialize)]
-struct Tree {
-    current: String,
-    children: Option<Vec<Tree>>,
+pub struct Rule {
+    root: String,
+    include: Option<Vec<String>>,
 }
 
-fn explore_tree(tree: &Tree, mut paths: &mut Vec<&Path>, root: &PathBuf) {
-    match &tree.children {
-        None => {
-            let temp = root.join(&tree.current);
-            paths.push(temp.as_path())
-        },
-        Some(children) => {
-            for child in children {
-                explore_tree(&child, &mut paths, &root.join(&tree.current))
-            }
+impl Rule {
+    pub fn new(path: &PathBuf) -> Self {
+        let rd = File::open(path).unwrap();
+        let rule: Rule = serde_yaml::from_reader(&rd).unwrap();
+        Self {
+            root: rule.root,
+            include: rule.include,
         }
     }
-}
 
-pub fn resolve(path: &Path) -> Vec<&Path> {
-    let rd = File::open(path).unwrap();
-    let tree: Tree = serde_yaml::from_reader(&rd).unwrap();
+    pub fn resolve(&self) -> Vec<PathBuf> {
+        let mut paths: Vec<PathBuf> = vec![];
+        let home = dirs::home_dir().unwrap();
+        let root = match self.root.as_str() {
+            "~" => home,
+            s if s.starts_with("~") => {
+                let root = s.replace("~", home.to_str().unwrap());
+                PathBuf::from(root)
+            }
+            _ => PathBuf::from(self.root.clone()),
+        };
 
-    let home = dirs::home_dir().unwrap();
-    let mut paths: Vec<&Path> = vec![];
-    explore_tree(&tree, &mut paths, &home);
-    println!("{:?}", paths);
-    paths
+        if let Some(children) = &self.include {
+            for child in children {
+                paths.push(root.join(child))
+            }
+        } else {
+            paths.push(root)
+        }
+        paths
+    }
 }
