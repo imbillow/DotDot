@@ -54,7 +54,7 @@ fn ensure_item_exists(path: &Path) {
 }
 
 fn remove_item(path: &Path) {
-    if is_dir(path) {
+    if path.exists() && is_dir(path) {
         fs::remove_dir_all(path);
     } else {
         fs::remove_file(path);
@@ -105,21 +105,28 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     // move and link them
     let backup_root = resolve_home(dd_opts.data_directory.as_str());
-    let home = dirs::home_dir().unwrap();
+    let home_dir = dirs::home_dir().expect("Can't get home dir");
 
-    for (name, items) in rules.iter() {
+    for (name, base_paths) in rules.iter() {
         let backup_dir = backup_root.join(name);
-        ensure_dir_exists(backup_dir.as_path());
         // Copy
-        let exists_items: Vec<&PathBuf> = items.iter().filter(|&i| i.exists()).collect();
-        if !exists_items.is_empty() {}
-        log::debug!("moved from {:#?} to {:#?}", items, backup_dir);
+        for base_path in base_paths {
+            let src = &home_dir.join(base_path);
+            if src.exists() {
+                let dst = &backup_dir.join(base_path);
+                ensure_dir_exists(&dst.parent().unwrap());
+                fs::copy(src, dst)
+                    .expect(format!("Failed copy from {:#?} to {:#?}", src, dst).as_str());
+                log::debug!("Copied from {:#?} to {:#?}", src, dst);
+            }
+        }
 
         // Hard link and delete origin
-        for item in items {
-            let src = backup_dir.join(item);
+        for base_path in base_paths {
+            let src = backup_dir.join(base_path);
             ensure_item_exists(src.as_path());
-            let dst = home.join(item);
+            let dst = home_dir.join(base_path);
+            ensure_dir_exists(&dst.parent().unwrap());
             remove_item(&dst);
             fs::hard_link(&src, &dst)
                 .expect(format!("failed link {:#?} to {:#?}", src, dst).as_str());
