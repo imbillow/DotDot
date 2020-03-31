@@ -1,11 +1,6 @@
-use serde::de::{MapAccess, Visitor};
-use serde::export::fmt::Error;
-use serde::export::Formatter;
-use serde::{Deserialize, Deserializer, Serialize};
-use std::collections::BTreeMap;
+use serde::{Deserialize, Serialize};
 use std::fs::File;
-use std::path::{Path, PathBuf};
-use std::{env, fs};
+use std::path::PathBuf;
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Rule {
@@ -25,15 +20,7 @@ impl Rule {
 
     pub fn resolve(&self) -> Vec<PathBuf> {
         let mut paths: Vec<PathBuf> = vec![];
-        let home = dirs::home_dir().unwrap();
-        let root = match self.root.as_str() {
-            "~" => home,
-            s if s.starts_with("~") => {
-                let root = s.replace("~", home.to_str().unwrap());
-                PathBuf::from(root)
-            }
-            _ => PathBuf::from(self.root.clone()),
-        };
+        let root = PathBuf::from(self.root.clone());
 
         if let Some(children) = &self.include {
             for child in children {

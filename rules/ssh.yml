@@ -1,4 +1,4 @@
-root: ~/.ssh
-includes:
+root: .ssh
+include:
   - config
   - known_hosts
