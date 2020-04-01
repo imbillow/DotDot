@@ -17,7 +17,9 @@ use dotdot::opt::{DDOpt, WorkMode};
 use dotdot::rule::Rule;
 use std::str::pattern::Pattern;
 
-fn backup(rules: &Rules, dd_opts: &DDOpt) {
+fn backup(dd_opts: &DDOpt) {
+    let rules = resolve_rules(&dd_opts);
+    validate_rules(&rules);
     // move and link them
     let backup_root = resolve_home(dd_opts.data_directory.as_str());
     let home_dir = dirs::home_dir().expect("Can't get home dir");
@@ -62,22 +64,21 @@ fn backup(rules: &Rules, dd_opts: &DDOpt) {
         }
     }
 }
-fn restore(rules: &Rules, dd_opts: &DDOpt) {}
 
-fn help() {}
+fn restore(dd_opts: &DDOpt) {}
+
+fn help(dd_opts: &mut DDOpt) {
+    dd_opts.app.print_help();
+}
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let dd_opts = DDOpt::new();
-    log::debug!("Running options:\n {:#?}", dd_opts);
-
-    let rules = resolve_rules(&dd_opts);
-    validate_rules(&rules);
+    let mut dd_opts = DDOpt::new();
+    // log::debug!("Running options:\n {:#?}", dd_opts);
 
     match dd_opts.mode {
-        WorkMode::Restore => restore(&rules, &dd_opts),
-        WorkMode::Backup => backup(&rules, &dd_opts),
-        _ => help(),
+        WorkMode::Restore => restore(&dd_opts),
+        WorkMode::Backup => backup(&dd_opts),
+        _ => help(&mut dd_opts),
     }
-
     Ok(())
 }

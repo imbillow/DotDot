@@ -14,14 +14,14 @@ pub enum WorkMode {
     Help,
 }
 
-#[derive(Debug)]
-struct DDCliOpt {
+struct DDCliOpt<'a, 'b> {
     pub config: Option<String>,
     pub rules_dir: Option<String>,
     pub data_directory: Option<String>,
     pub mode: WorkMode,
     pub force: bool,
     pub verbose: u8,
+    pub app: App<'a, 'b>,
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
@@ -32,18 +32,18 @@ struct DDConfigFileOpt {
     pub verbose: Option<u8>,
 }
 
-#[derive(Debug)]
-pub struct DDOpt {
+pub struct DDOpt<'a, 'b> {
     pub rule_dir: Vec<String>,
     pub data_directory: String,
     pub force: bool,
     pub verbose: u8,
     pub mode: WorkMode,
+    pub app: App<'a, 'b>,
 }
 
-impl DDCliOpt {
-    pub fn new() -> DDCliOpt {
-        let mut app = App::new("DotDot")
+impl<'a, 'b> DDCliOpt<'a, 'b> {
+    pub fn new() -> DDCliOpt<'a, 'b> {
+        let app = App::new("DotDot")
             .version("0.1.0")
             .author("iov billow.fun@gmail.com")
             .about("Backup dotfiles")
@@ -60,7 +60,8 @@ impl DDCliOpt {
                     .long("rules")
                     .value_name("DIRECTORY")
                     .help("Sets a addition rule directory")
-                    .takes_value(true),
+                    .takes_value(true)
+                    .default_value("rules"),
             )
             .arg(
                 Arg::with_name("backup")
@@ -76,7 +77,8 @@ impl DDCliOpt {
             .arg(
                 Arg::with_name("data_directory")
                     .long("data_directory")
-                    .value_name("DIRECTORY"),
+                    .value_name("DIRECTORY")
+                    .default_value("~/Dotfiles"),
             )
             .arg(
                 Arg::with_name("force")
@@ -91,7 +93,7 @@ impl DDCliOpt {
                     .multiple(true)
                     .help("Sets the level of verbosity"),
             );
-        let matches = app.get_matches();
+        let matches = app.clone().get_matches();
 
         let mode = if matches.is_present("backup") {
             Backup
@@ -108,12 +110,13 @@ impl DDCliOpt {
             mode,
             force: matches.is_present("force"),
             verbose: matches.occurrences_of("verbose") as u8,
+            app,
         }
     }
 }
 
-impl DDOpt {
-    pub fn new() -> DDOpt {
+impl<'a, 'b> DDOpt<'a, 'b> {
+    pub fn new() -> DDOpt<'a, 'b> {
         let cli_opt = DDCliOpt::new();
 
         let config_path = cli_opt.config.clone().unwrap();
@@ -136,29 +139,26 @@ fn setup_logger(verbose: u8) {
     log::set_max_level(level_filter);
 }
 
-fn merge(file_opt: DDConfigFileOpt, cli_opt: DDCliOpt) -> DDOpt {
+fn merge<'a, 'b>(file_opt: DDConfigFileOpt, cli_opt: DDCliOpt<'a, 'b>) -> DDOpt<'a, 'b> {
     let mut opt = DDOpt {
         rule_dir: file_opt.rules_dir.clone().unwrap_or_default(),
         data_directory: file_opt.data_directory.clone().unwrap_or_default(),
         force: file_opt.force.unwrap_or_default() || cli_opt.force,
         verbose: file_opt.verbose.unwrap_or_default(),
         mode: cli_opt.mode,
+        app: cli_opt.app,
     };
 
     if let Some(d) = &cli_opt.rules_dir {
         if !opt.rule_dir.contains(&d) {
             opt.rule_dir.push(d.clone());
         }
-    } else if opt.rule_dir.is_empty() {
-        opt.rule_dir.push("test-rules".to_string());
     }
     if let Some(d) = &cli_opt.data_directory {
         opt.data_directory = d.clone();
-    } else if opt.data_directory.is_empty() {
-        opt.data_directory = "~/Dotfiles".to_string();
     }
     setup_logger(opt.verbose);
-    log::trace!("merge \n{:#?} \n{:#?}", &file_opt, &cli_opt);
+    // log::trace!("merge \n{:#?} \n{:#?}", &file_opt, &cli_opt);
 
     opt
 }
