@@ -7,7 +7,7 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use std::str::pattern::Pattern;
 
-type Rules = HashMap<String, Vec<PathBuf>>;
+pub type Rules = HashMap<String, Vec<PathBuf>>;
 
 pub fn resolve_home(s: &str) -> PathBuf {
     let res = if s.starts_with("~") {
@@ -55,8 +55,9 @@ pub fn remove_item(path: &Path) {
             fs::remove_file(path);
             log::trace!("Remove file {:#?}", path);
         }
+    } else {
+        log::trace!("Canceled remove, {:#?} is not exists", path);
     }
-    log::trace!("Canceled remove, {:#?} is not exists", path);
 }
 
 pub fn resolve_rules(opt: &DDOpt) -> Rules {

@@ -1,6 +1,6 @@
 use dotdot::helper::is_dir;
 use std::fs;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 #[test]
 fn test() {
@@ -10,11 +10,19 @@ fn test() {
 }
 
 #[test]
-fn is_not_dir_test() {
+fn is_dir_test_not_dir() {
     assert!(!is_dir(&Path::new("/home/x")));
 }
 
 #[test]
-fn is_dir_test() {
+fn is_dir_test_is_dir() {
     assert!(is_dir(&Path::new("/home/x/")));
+}
+
+#[test]
+fn path_parent_test() {
+    assert_eq!(
+        PathBuf::from("/a/b/").parent().unwrap(),
+        PathBuf::from("/a")
+    )
 }

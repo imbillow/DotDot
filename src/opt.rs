@@ -43,7 +43,7 @@ pub struct DDOpt {
 
 impl DDCliOpt {
     pub fn new() -> DDCliOpt {
-        let matches = App::new("DotDot")
+        let mut app = App::new("DotDot")
             .version("0.1.0")
             .author("iov billow.fun@gmail.com")
             .about("Backup dotfiles")
@@ -90,8 +90,8 @@ impl DDCliOpt {
                     .long("verbose")
                     .multiple(true)
                     .help("Sets the level of verbosity"),
-            )
-            .get_matches();
+            );
+        let matches = app.get_matches();
 
         let mode = if matches.is_present("backup") {
             Backup
