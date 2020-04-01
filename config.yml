@@ -1,5 +1,5 @@
 rules_dir:
   - rules
-data_directory: ~/dotfile
-force: true
-verbose: 1
+data_directory: ~/Dotfile
+force: false
+verbose: 2

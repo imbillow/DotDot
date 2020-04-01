@@ -35,7 +35,7 @@ pub fn ensure_dir_exists(path: &Path) {
 }
 
 pub fn is_dir(path: &Path) -> bool {
-    path.to_str().unwrap().is_suffix_of("/")
+    "/".is_suffix_of(path.to_str().unwrap())
 }
 
 pub fn ensure_item_exists(path: &Path) {
@@ -47,11 +47,16 @@ pub fn ensure_item_exists(path: &Path) {
 }
 
 pub fn remove_item(path: &Path) {
-    if path.exists() && is_dir(path) {
-        fs::remove_dir_all(path);
-    } else {
-        fs::remove_file(path);
+    if path.exists() {
+        if is_dir(path) {
+            fs::remove_dir_all(path);
+            log::trace!("Remove dir {:#?}", path);
+        } else {
+            fs::remove_file(path);
+            log::trace!("Remove file {:#?}", path);
+        }
     }
+    log::trace!("Canceled remove, {:#?} is not exists", path);
 }
 
 pub fn resolve_rules(opt: &DDOpt) -> Rules {
@@ -71,7 +76,7 @@ pub fn resolve_rules(opt: &DDOpt) -> Rules {
         }
     }
 
-    log::debug!("resolve test-rules: {:#?}", rules);
+    log::debug!("resolve rules: {:#?}", rules);
     rules
 }
 

@@ -34,6 +34,9 @@ fn main() -> Result<(), Box<dyn Error>> {
             let src = &home_dir.join(base_path);
             if src.exists() {
                 let dst = &backup_dir.join(base_path);
+                if dst.exists() && !dd_opts.force {
+                    continue;
+                }
                 ensure_dir_exists(&dst.parent().unwrap());
                 fs::copy(src, dst)
                     .expect(format!("Failed copy from {:#?} to {:#?}", src, dst).as_str());
@@ -43,11 +46,11 @@ fn main() -> Result<(), Box<dyn Error>> {
 
         // Hard link and delete origin
         for base_path in base_paths {
-            let src = backup_dir.join(base_path);
-            ensure_item_exists(src.as_path());
-            let dst = home_dir.join(base_path);
-            ensure_dir_exists(&dst.parent().unwrap());
-            remove_item(&dst);
+            let dst = backup_dir.join(base_path);
+            ensure_item_exists(dst.as_path());
+            let src = home_dir.join(base_path);
+            ensure_dir_exists(&src.parent().unwrap());
+            remove_item(&src);
             fs::hard_link(&src, &dst)
                 .expect(format!("failed link {:#?} to {:#?}", src, dst).as_str());
             log::debug!("linked {:#?} to {:#?}", src, dst);

@@ -158,7 +158,7 @@ fn merge(file_opt: DDConfigFileOpt, cli_opt: DDCliOpt) -> DDOpt {
         opt.data_directory = "~/Dotfiles".to_string();
     }
     setup_logger(opt.verbose);
-    log::debug!("merge \n{:#?} \n{:#?}", &file_opt, &cli_opt);
+    log::trace!("merge \n{:#?} \n{:#?}", &file_opt, &cli_opt);
 
     opt
 }

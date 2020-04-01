@@ -10,8 +10,9 @@ pub struct Rule {
 
 impl Rule {
     pub fn new(path: &PathBuf) -> Self {
-        let rd = File::open(path).unwrap();
-        let rule: Rule = serde_yaml::from_reader(&rd).unwrap();
+        let rd = File::open(path).expect(format!("can't open rule file {:#?}", path).as_str());
+        let rule: Rule = serde_yaml::from_reader(&rd)
+            .expect(format!("can't parse yml rule file {:#?}", path).as_str());
         Self {
             root: rule.root,
             include: rule.include,
