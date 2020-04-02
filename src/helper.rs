@@ -64,8 +64,7 @@ pub fn resolve_rules(opt: &DDOpt) -> Rules {
         for entry in fs::read_dir(rule_dir).expect("failed read rule dir") {
             if let Ok(entry) = entry {
                 let rule = Rule::new(&entry.path());
-                log::debug!("{:#?}", rule);
-
+                // log::debug!("{:#?}", rule);
                 let entry_path = entry.path();
                 let name = entry_path.file_stem().unwrap();
                 rules.insert(String::from(name.to_str().unwrap()), rule.resolve());
@@ -90,5 +89,14 @@ pub fn validate_rules(rules: &Rules) {
                 }
             }
         }
+    }
+}
+
+pub fn remove_dir_end_slash(path: &PathBuf) -> PathBuf {
+    if !is_dir(path) {
+        path.clone()
+    } else {
+        let str = path.to_str().unwrap();
+        PathBuf::from(str[0..str.len() - 1].to_string())
     }
 }

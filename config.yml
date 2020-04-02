@@ -2,4 +2,4 @@ rules_dir:
   - rules
 data_directory: ~/Dotfile
 force: true
-verbose: 2
+verbose: 1
