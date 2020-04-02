@@ -22,6 +22,11 @@ fn copy_items(src_dir: &PathBuf, dst_dir: &PathBuf, bases: &Vec<PathBuf>, force:
             )
         };
 
+        if src.read_link().is_ok() {
+            log::info!("{:#?} is a symbolic link skip", src);
+            continue;
+        }
+
         if !src.exists() {
             log::warn!("Skip copy, {:#?} not exists", src);
             continue;
@@ -71,7 +76,7 @@ fn backup(dd_opts: &DDOpt) {
             log::debug!("linked {:#?} to {:#?}", src, dst);
         }
 
-        log::info!("Process {} end", name);
+        log::info!("Process {} end\n", name);
     }
 }
 

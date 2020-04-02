@@ -20,3 +20,4 @@ include:
 
 to `~/.gradle/gradle.properties` and `~/.gradle/init.d/*`
 
+Very fast, but 应该有很多 bug.
