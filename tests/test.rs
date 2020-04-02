@@ -1,4 +1,4 @@
-use dotdot::helper::is_dir;
+use dotdot::helper::{copy_dir, is_dir};
 use std::fs;
 use std::path::{Path, PathBuf};
 
@@ -6,6 +6,17 @@ use std::path::{Path, PathBuf};
 fn test() {
     fs::File::create("hello.txt");
     fs::hard_link("hello.txt", "link.txt");
+
+    let p = PathBuf::from("rules");
+    let cur = p.exists();
+    assert!(cur);
+    copy_dir(
+        // "/home/iov/.config/fish",
+        // "/home/iov/Dotfiles/fish/.config/fish",
+        p.as_path(),
+        Path::new("rules-copy"),
+    )
+    .expect("failed");
     assert_eq!(1, 1);
 }
 

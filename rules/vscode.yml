@@ -1,5 +1,0 @@
-root: .config/Code/User
-include:
-  - settings.json
-  - keybindings.json
-  - snippets/

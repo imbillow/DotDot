@@ -6,14 +6,13 @@ use std::fs;
 use std::path::{Path, PathBuf};
 
 use dotdot::helper::{
-    ensure_dir_exists, ensure_item_exists, is_dir, remove_dir_end_slash, remove_item, resolve_home,
-    resolve_rules, validate_rules,
+    copy_dir, ensure_dir_exists, ensure_item_exists, is_dir, remove_dir_end_slash, remove_item,
+    resolve_home, resolve_rules, validate_rules,
 };
 use dotdot::opt::{DDOpt, WorkMode};
-use fs_extra::dir;
+use std::fs::remove_file;
 
 fn copy_items(src_dir: &PathBuf, dst_dir: &PathBuf, bases: &Vec<PathBuf>, force: bool) {
-    let copy_opt = dir::CopyOptions::new();
     for base in bases.iter() {
         let (src, dst) = if !is_dir(base) {
             (src_dir.join(base), dst_dir.join(base))
@@ -35,7 +34,7 @@ fn copy_items(src_dir: &PathBuf, dst_dir: &PathBuf, bases: &Vec<PathBuf>, force:
         ensure_dir_exists(&dst.parent().unwrap());
 
         if is_dir(&base) {
-            dir::copy(&src, &dst, &copy_opt)
+            copy_dir(&src, &dst)
                 .expect(format!("Failed copy from {:#?} to {:#?}", &src, &dst).as_str());
         } else {
             fs::copy(&src, &dst)
@@ -53,30 +52,33 @@ fn backup(dd_opts: &DDOpt) {
     let home_dir = dirs::home_dir().expect("Can't get home dir");
 
     for (name, base_paths) in rules.iter() {
+        log::info!("Process {}", name);
+
         let backup_dir = backup_root.join(name);
         copy_items(&home_dir, &backup_dir, base_paths, dd_opts.force);
         // Link and delete origin
         for base_path in base_paths {
-            let src = backup_dir.join(base_path);
+            let mut src = backup_dir.join(base_path);
             ensure_item_exists(src.as_path());
             let mut dst = home_dir.join(base_path);
             ensure_dir_exists(&dst.parent().unwrap());
 
             // Trim the end "/"
             dst = remove_dir_end_slash(&dst);
-
+            src = remove_dir_end_slash(&src);
             remove_item(&dst);
             fs::soft_link(&src, &dst)
                 .expect(format!("failed link {:#?} to {:#?}", src, dst).as_str());
             log::debug!("linked {:#?} to {:#?}", src, dst);
         }
+
+        log::info!("Process {} end", name);
     }
 }
 
 fn restore(dd_opts: &DDOpt) {
     let rules = resolve_rules(&dd_opts);
     validate_rules(&rules);
-    // move and link them
     let backup_root = resolve_home(dd_opts.data_directory.as_str());
     let home_dir = dirs::home_dir().expect("Can't get home dir");
 
@@ -84,8 +86,8 @@ fn restore(dd_opts: &DDOpt) {
         let backup_dir = backup_root.join(name);
         // remove link point
         for base_path in base_paths {
-            fs::remove_file(home_dir.join(base_path));
-            log::debug!("Removed link {:#?}", base_path);
+            let link_point = home_dir.join(base_path);
+            remove_item(&remove_dir_end_slash(&link_point));
         }
         copy_items(&backup_dir, &home_dir, base_paths, dd_opts.force);
     }
