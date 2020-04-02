@@ -1,21 +1,17 @@
 #![feature(pattern)]
+#![allow(deprecated)]
 
-use std::collections::HashMap;
 use std::error::Error;
+use std::fs;
 use std::path::{Path, PathBuf};
-use std::{env, fs};
-
-use clap::{App, Arg};
-use log::{max_level, Level, LevelFilter};
 
 use dotdot::helper::{
     ensure_dir_exists, ensure_item_exists, is_dir, remove_item, resolve_home, resolve_rules,
-    validate_rules, Rules,
+    validate_rules,
 };
-use dotdot::logger::ConsoleLogger;
 use dotdot::opt::{DDOpt, WorkMode};
-use dotdot::rule::Rule;
-use std::str::pattern::Pattern;
+
+fn copy(src_dir: &PathBuf, dst_dir: &PathBuf, base_paths: &Vec<PathBuf>, dd_opts: DDOpt) {}
 
 fn backup(dd_opts: &DDOpt) {
     let rules = resolve_rules(&dd_opts);
@@ -44,7 +40,7 @@ fn backup(dd_opts: &DDOpt) {
             log::debug!("Copied from {:#?} to {:#?}", src, dst);
         }
 
-        // Hard link and delete origin
+        // Link and delete origin
         for base_path in base_paths {
             let src = backup_dir.join(base_path);
             ensure_item_exists(src.as_path());
@@ -65,10 +61,13 @@ fn backup(dd_opts: &DDOpt) {
     }
 }
 
-fn restore(dd_opts: &DDOpt) {}
+fn restore(dd_opts: &DDOpt) {
+    //    TODO remove link point
+    //    TODO copy backup to link point
+}
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let mut dd_opts = DDOpt::new();
+    let dd_opts = DDOpt::new();
     log::debug!("Running options:\n {:#?}", dd_opts);
 
     match dd_opts.mode {

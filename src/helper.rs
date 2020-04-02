@@ -1,5 +1,3 @@
-#![feature(pattern)]
-
 use crate::opt::DDOpt;
 use crate::rule::Rule;
 use std::collections::HashMap;
@@ -49,10 +47,10 @@ pub fn ensure_item_exists(path: &Path) {
 pub fn remove_item(path: &Path) {
     if path.exists() {
         if is_dir(path) {
-            fs::remove_dir_all(path);
+            fs::remove_dir_all(path).expect(format!("Failed remove {:#?}", path).as_str());
             log::trace!("Remove dir {:#?}", path);
         } else {
-            fs::remove_file(path);
+            fs::remove_file(path).expect(format!("Failed remove {:#?}", path).as_str());
             log::trace!("Remove file {:#?}", path);
         }
     } else {

@@ -3,12 +3,8 @@ use crate::opt::WorkMode::{Backup, Help, Restore};
 use clap::{App, Arg};
 use log::LevelFilter;
 use serde::export::fmt::Debug;
-use serde::export::Formatter;
 use serde::{Deserialize, Serialize};
-use std::error::Error;
-use std::fmt;
 use std::fs::File;
-use std::path::PathBuf;
 
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub enum WorkMode {
@@ -106,7 +102,7 @@ impl DDCliOpt {
             Help
         };
         if mode == Help {
-            app.print_help();
+            app.print_help().expect("Failed print help");
         }
 
         Self {
