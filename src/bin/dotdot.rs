@@ -67,18 +67,14 @@ fn backup(dd_opts: &DDOpt) {
 
 fn restore(dd_opts: &DDOpt) {}
 
-fn help(dd_opts: &mut DDOpt) {
-    dd_opts.app.print_help();
-}
-
 fn main() -> Result<(), Box<dyn Error>> {
     let mut dd_opts = DDOpt::new();
-    // log::debug!("Running options:\n {:#?}", dd_opts);
+    log::debug!("Running options:\n {:#?}", dd_opts);
 
     match dd_opts.mode {
         WorkMode::Restore => restore(&dd_opts),
         WorkMode::Backup => backup(&dd_opts),
-        _ => help(&mut dd_opts),
+        _ => (),
     }
     Ok(())
 }

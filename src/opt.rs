@@ -2,26 +2,29 @@ use crate::logger::ConsoleLogger;
 use crate::opt::WorkMode::{Backup, Help, Restore};
 use clap::{App, Arg};
 use log::LevelFilter;
+use serde::export::fmt::Debug;
+use serde::export::Formatter;
 use serde::{Deserialize, Serialize};
 use std::error::Error;
+use std::fmt;
 use std::fs::File;
 use std::path::PathBuf;
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub enum WorkMode {
     Backup,
     Restore,
     Help,
 }
 
-struct DDCliOpt<'a, 'b> {
+#[derive(Debug)]
+struct DDCliOpt {
     pub config: Option<String>,
     pub rules_dir: Option<String>,
     pub data_directory: Option<String>,
     pub mode: WorkMode,
     pub force: bool,
     pub verbose: u8,
-    pub app: App<'a, 'b>,
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
@@ -32,18 +35,18 @@ struct DDConfigFileOpt {
     pub verbose: Option<u8>,
 }
 
-pub struct DDOpt<'a, 'b> {
+#[derive(Debug)]
+pub struct DDOpt {
     pub rule_dir: Vec<String>,
     pub data_directory: String,
     pub force: bool,
     pub verbose: u8,
     pub mode: WorkMode,
-    pub app: App<'a, 'b>,
 }
 
-impl<'a, 'b> DDCliOpt<'a, 'b> {
-    pub fn new() -> DDCliOpt<'a, 'b> {
-        let app = App::new("DotDot")
+impl DDCliOpt {
+    pub fn new() -> DDCliOpt {
+        let mut app = App::new("DotDot")
             .version("0.1.0")
             .author("iov billow.fun@gmail.com")
             .about("Backup dotfiles")
@@ -102,6 +105,9 @@ impl<'a, 'b> DDCliOpt<'a, 'b> {
         } else {
             Help
         };
+        if mode == Help {
+            app.print_help();
+        }
 
         Self {
             config: matches.value_of("config").map(|d| String::from(d)),
@@ -110,13 +116,12 @@ impl<'a, 'b> DDCliOpt<'a, 'b> {
             mode,
             force: matches.is_present("force"),
             verbose: matches.occurrences_of("verbose") as u8,
-            app,
         }
     }
 }
 
-impl<'a, 'b> DDOpt<'a, 'b> {
-    pub fn new() -> DDOpt<'a, 'b> {
+impl DDOpt {
+    pub fn new() -> DDOpt {
         let cli_opt = DDCliOpt::new();
 
         let config_path = cli_opt.config.clone().unwrap();
@@ -139,14 +144,13 @@ fn setup_logger(verbose: u8) {
     log::set_max_level(level_filter);
 }
 
-fn merge<'a, 'b>(file_opt: DDConfigFileOpt, cli_opt: DDCliOpt<'a, 'b>) -> DDOpt<'a, 'b> {
+fn merge(file_opt: DDConfigFileOpt, cli_opt: DDCliOpt) -> DDOpt {
     let mut opt = DDOpt {
         rule_dir: file_opt.rules_dir.clone().unwrap_or_default(),
         data_directory: file_opt.data_directory.clone().unwrap_or_default(),
         force: file_opt.force.unwrap_or_default() || cli_opt.force,
         verbose: file_opt.verbose.unwrap_or_default(),
         mode: cli_opt.mode,
-        app: cli_opt.app,
     };
 
     if let Some(d) = &cli_opt.rules_dir {
@@ -158,7 +162,7 @@ fn merge<'a, 'b>(file_opt: DDConfigFileOpt, cli_opt: DDCliOpt<'a, 'b>) -> DDOpt<
         opt.data_directory = d.clone();
     }
     setup_logger(opt.verbose);
-    // log::trace!("merge \n{:#?} \n{:#?}", &file_opt, &cli_opt);
+    log::trace!("merge \n{:#?} \n{:#?}", &file_opt, &cli_opt);
 
     opt
 }
