@@ -3,14 +3,13 @@
 
 use std::error::Error;
 use std::fs;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 use dotdot::helper::{
     copy_dir, ensure_dir_exists, ensure_item_exists, is_dir, remove_dir_end_slash, remove_item,
     resolve_home, resolve_rules, validate_rules,
 };
 use dotdot::opt::{DDOpt, WorkMode};
-use std::fs::remove_file;
 
 fn copy_items(src_dir: &PathBuf, dst_dir: &PathBuf, bases: &Vec<PathBuf>, force: bool) {
     for base in bases.iter() {
