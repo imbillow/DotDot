@@ -77,6 +77,7 @@ impl DDCliOpt {
                 Arg::with_name("data_directory")
                     .long("data_directory")
                     .value_name("DIRECTORY")
+                    .help("Directory to store backup file")
                     .default_value("~/Dotfiles"),
             )
             .arg(
@@ -144,7 +145,7 @@ fn merge(file_opt: DDConfigFileOpt, cli_opt: DDCliOpt) -> DDOpt {
     let mut opt = DDOpt {
         rule_dir: file_opt.rules_dir.clone().unwrap_or_default(),
         data_directory: file_opt.data_directory.clone().unwrap_or_default(),
-        force: file_opt.force.unwrap_or_default() || cli_opt.force,
+        force: cli_opt.force || file_opt.force.unwrap_or_default(),
         verbose: file_opt.verbose.unwrap_or_default(),
         mode: cli_opt.mode,
     };
@@ -156,6 +157,9 @@ fn merge(file_opt: DDConfigFileOpt, cli_opt: DDCliOpt) -> DDOpt {
     }
     if let Some(d) = &cli_opt.data_directory {
         opt.data_directory = d.clone();
+    }
+    if cli_opt.verbose > opt.verbose {
+        opt.verbose = cli_opt.verbose;
     }
     setup_logger(opt.verbose);
     log::trace!("merge \n{:#?} \n{:#?}", &file_opt, &cli_opt);

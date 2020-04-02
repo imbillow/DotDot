@@ -1,12 +1,22 @@
 # DotDot
 
-Backup Dot files.
+Backup My Dot files.
 
 Resolve rule file like:
 
 git.yml
-```yml
+```yaml
 root: .gitconfig
 ```
 
 to `~/.gitconfig`
+
+```yaml
+root: .gradle
+include:
+  - gradle.properties
+  - init.d/
+```
+
+to `~/.gradle/gradle.properties` and `~/.gradle/init.d/*`
+
