@@ -122,7 +122,8 @@ impl DDOpt {
         let cli_opt = DDCliOpt::new();
 
         let config_path = cli_opt.config.clone().unwrap();
-        let rd = File::open(config_path).unwrap();
+        let rd = File::open(&config_path)
+            .expect(format!("can't open config file {:#?}", config_path).as_str());
         let file_opt: DDConfigFileOpt = serde_yaml::from_reader(&rd).unwrap();
         merge(file_opt, cli_opt)
     }
