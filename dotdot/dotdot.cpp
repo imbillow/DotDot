@@ -1,12 +1,11 @@
-﻿// dotdot.cpp : Defines the entry point for the application.
-//
+﻿#include "dotdot.h"
+#include "CLI11.hpp"
 
-#include "dotdot.h"
-
-using namespace std;
 
 int main()
 {
-	cout << "Hello CMake." << endl;
-	return 0;
+  CLI::App app = {.app_description = "Backup dotfiles", .app_name="dotdot"};
+  app.add_flag("backup");
+  app.add_flag("restore");
+  return 0;
 }
