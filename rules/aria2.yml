@@ -1,0 +1,4 @@
+root: .config/aria2
+include:
+  - aria2.conf
+  

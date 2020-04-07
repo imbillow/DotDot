@@ -4,3 +4,4 @@ pub mod helper;
 pub mod logger;
 pub mod opt;
 pub mod rule;
+pub mod files;
