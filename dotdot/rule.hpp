@@ -27,8 +27,8 @@ inline std::ostream &operator<<(std::ostream &os, const ItemType &obj) {
 }
 
 struct Item {
-  ItemType Type;
-  path Path;
+  ItemType Type{};
+  path Path{};
 
   Item() = default;
 

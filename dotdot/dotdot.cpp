@@ -41,11 +41,11 @@ int main(int argc, char *argv[]) {
   rulesDir.erase(lst, rulesDir.end());
 
   std::vector<path> rulesPath{};
-  std::transform(rulesDir.begin(), rulesDir.end(), std::back_inserter(rulesPath), [](const std::string &dir) {
-	return NormalizePath(dir);
-  });
+  std::transform(rulesDir.begin(), rulesDir.end(), std::back_inserter(rulesPath),
+				 [](const std::string &dir) {
+				   return NormalizePath(dir);
+				 });
 
-  std::cout << rulesPath << std::endl;
   const auto rules = ResolveDirs(rulesPath);
 
   if (rules.empty()) {
