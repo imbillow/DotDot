@@ -30,18 +30,31 @@ struct Item {
   ItemType Type;
   path Path;
 
+  Item() = default;
+
   Item(ItemType Type, path Path) : Type(Type), Path(std::move(Path)) {}
 
-  explicit Item(const path &parent, const std::string &relative = (std::string &)"") {
-	Type = ItemType::File;
-	std::string relativePath{};
-
-	if (relative.ends_with("/")) {
-	  relativePath = relative.substr(0, relative.size() - 1);
+  explicit Item(const path &parent) {
+	auto parentStr = parent.string();
+	if (parentStr.ends_with("/")) {
+	  parentStr = parentStr.substr(0, parentStr.size() - 1);
 	  Type = ItemType::Dir;
+	  Path = path{parentStr};
+	} else {
+	  Type = ItemType::File;
+	  Path = path{parent};
 	}
+  }
 
-	Path = parent / path{relativePath};
+  Item(const path &parent, const std::string &relative) {
+	if (relative.ends_with("/")) {
+	  auto trimRelative = relative.substr(0, relative.size() - 1);
+	  Type = ItemType::Dir;
+	  Path = parent / path{trimRelative};
+	} else {
+	  Type = ItemType::File;
+	  Path = parent / path{relative};
+	}
   }
 
   friend std::ostream &operator<<(std::ostream &os, const Item &obj) {
@@ -92,16 +105,10 @@ inline void ResolveDir(const path &dir, Rules &rulesOut) {
 }
 
 inline Rule ResolveFile(const path &file) {
-  std::cout << file << "\n";
   Rule rule{.Name=file.stem().string(), .Items=ItemsType{}};
-  auto node = YAML::Load(file);
+  auto node = YAML::LoadFile(file);
 
-  for (auto it = node.begin(); it != node.end(); ++it) {
-	std::cout << it->as<std::string>() << "\n";
-  }
-  std::cout << node["root"].as<std::string>() << "\n";
-
-//  ResolveNode(node, rule.Items);
+  ResolveNode(node, rule.Items);
 
   #ifdef WINDOWS
   if (node["windows"]) {
@@ -117,10 +124,7 @@ inline Rule ResolveFile(const path &file) {
 }
 
 inline void ResolveNode(const YAML::Node &node, ItemsType &itemsOut) {
-  std::cout << node.Type() << "\n";
-  std::cout << (node.Type() == YAML::NodeType::Scalar) << "\n";
-
-  const path root = NormalizePath(node["root"].as<std::string>());
+  const path root{node["root"].as<std::string>()};
   if (node["include"]) {
 	auto include = node["include"].as<std::vector<std::string >>();
 	for (const auto &child : include) {

@@ -42,8 +42,6 @@ path NormalizePath(const std::string &ph) {
 	path ret{};
 	if (ph.starts_with("~")) {
 	  ret = homePath.concat(ph.substr(1));
-	} else {
-	  ret = fs::canonical(ph);
 	}
 	return homePath;
   } else {
