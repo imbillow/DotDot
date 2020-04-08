@@ -5,75 +5,78 @@
 #include "util.hpp"
 #include <filesystem>
 
-namespace Dotdot
-{
-    using std::filesystem::path;
+namespace Dotdot {
 
-    enum class ItemType
-    {
-        File,
-        Dir,
-    };
+namespace fs = std::filesystem;
+using std::filesystem::path;
 
-    inline std::ostream& operator<<(std::ostream& os, const ItemType& obj)
-    {
-        switch (obj)
-        {
-        case ItemType::File: os << "File";
-            break;
-        case ItemType::Dir: os << "Dir";
-            break;
-        default: ;
-        }
-        return os;
-    }
+enum class ItemType {
+  File,
+  Dir,
+};
 
-    struct Item
-    {
-        ItemType Type;
-        path Path;
+inline std::ostream &operator<<(std::ostream &os, const ItemType &obj) {
+  switch (obj) {
+  case ItemType::File: os << "File";
+	break;
+  case ItemType::Dir: os << "Dir";
+	break;
+  default:;
+  }
+  return os;
+}
 
-        friend std::ostream& operator<<(std::ostream& os, const Item& obj)
-        {
-            return os
-                << "Type: " << obj.Type
-                << ", Path: " << obj.Path;
-        }
-    };
+struct Item {
+  ItemType Type;
+  path Path;
 
-    struct Rule
-    {
-        std::string Name;
-        std::vector<Item> Items;
+  friend std::ostream &operator<<(std::ostream &os, const Item &obj) {
+	return os
+		<< "Type: " << obj.Type
+		<< ", Path: " << obj.Path;
+  }
+};
 
-        friend std::ostream& operator<<(std::ostream& os, const Rule& obj)
-        {
-            return os
-                << "Name: " << obj.Name
-                << ", Items: " << obj.Items;
-        }
-    };
+struct Rule {
+  std::string Name;
+  std::vector<Item> Items;
 
-    using Rules = std::vector<Rule>;
+  friend std::ostream &operator<<(std::ostream &os, const Rule &obj) {
+	return os
+		<< "Name: " << obj.Name
+		<< ", Items: " << obj.Items;
+  }
+};
 
-    inline Rules ResolveDirs(const std::vector<path>& dir)
-    {
-        // TODO
+using Rules = std::vector<Rule>;
 
-        return {};
-    }
+inline Rules ResolveDirs(const std::vector<path> &dirs);
+inline void ResolveDir(const path &dir, Rules &rulesOut);
+inline Rule ResolveFile(const path &file);
 
-    inline void ResolveDir(const path& dir, const Rules& rulesOut)
-    {
-        // TODO
+inline Rules ResolveDirs(const std::vector<path> &dirs) {
+  Rules rules{};
+  for (const auto &dir:dirs) {
+	ResolveDir(dir, rules);
+  }
+  return rules;
+}
 
-    }
+using namespace std;
 
-    inline Rule ResolveFile(const path& file)
-    {
-        // TODO
+inline void ResolveDir(const path &dir, Rules &rulesOut) {
+  for (const auto &item : fs::recursive_directory_iterator{dir}) {
+	if (!item.is_regular_file() || item.path().extension().string() != "yml") {
+	  continue;
+	}
 
-        return {};
-    }
+	auto rule = ResolveFile(item.path());
+	rulesOut.push_back(rule);
+  }
+}
+
+inline Rule ResolveFile(const path &file) {
+  return {};
+}
 }
 #endif // RULE_H
