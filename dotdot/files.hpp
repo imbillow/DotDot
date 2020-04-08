@@ -19,7 +19,11 @@ void SoftLink(const MappersType &mappers);
 inline void Copy(const MappersType &mappers) {
   ForeachMapper(mappers,
 				[](const path &src, const path &dst, const ItemType &type) {
-				  std::cout << src << " -> " << dst << "\n";
+                  if (!fs::exists(src)){
+                      return;
+                  }
+				  std::cout << src << " -> " << dst << " copied\n";
+
 				  if (type == ItemType::File) {
 					fs::copy_file(src, dst, fs::copy_options::skip_existing);
 				  } else {
@@ -31,10 +35,22 @@ inline void Copy(const MappersType &mappers) {
 inline void SoftLink(const MappersType &mappers) {
   ForeachMapper(mappers,
 				[](const path &link, const path &to, const ItemType &type) {
+                  if (!fs::exists(to)){
+                    if (type==ItemType::File) {
+                      std::ofstream{to.c_str()};
+                    } else {
+                     fs::create_directories(to);
+                    }
+                  }
+
+				  std::cout << link << " -> " << to << " linked\n";
+
 				  if (type == ItemType::File) {
 					fs::create_symlink(to, link);
+                     //CreateSymbolicLinkA(link.c_str(), to.c_str(), 0);
 				  } else {
 					fs::create_directory_symlink(to, link);
+                     //CreateSymbolicLinkA(link.c_str(), to.c_str(), 1);
 				  }
 				});
 }

@@ -6,6 +6,7 @@
 #pragma once
 
 #include <iostream>
+#include <fstream>
 #include <iterator>
 #include <unordered_set>
 #include <filesystem>
@@ -13,5 +14,9 @@
 #include <exception>
 #include <tuple>
 #include <functional>
+
+#ifdef _WIN32
+#include <WinBase.h>
+#endif
 
 #endif

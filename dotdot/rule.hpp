@@ -48,7 +48,7 @@ struct Item {
 
   Item(const path &parent, const std::string &relative) {
 	if (relative.ends_with("/")) {
-	  auto trimRelative = relative.substr(0, relative.size() - 1);
+	  const auto trimRelative = relative.substr(0, relative.size() - 1);
 	  Type = ItemType::Dir;
 	  Path = parent / path{trimRelative};
 	} else {
