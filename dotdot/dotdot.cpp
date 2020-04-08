@@ -26,7 +26,7 @@ int main(int argc, char *argv[]) {
   );
 
   if (const auto ret = !parse(argc, argv, cli) || optShowHelp) {
-	if (ret) {
+	if (ret && !optShowHelp) {
 	  std::cerr << "Failed parse arguments: \n";
 	  for (auto i = 1; i < argc; ++i) {
 		std::cerr << argv[i] << "\n";
