@@ -11,5 +11,7 @@
 #include <filesystem>
 #include <cstdlib>
 #include <exception>
+#include <tuple>
+#include <functional>
 
 #endif

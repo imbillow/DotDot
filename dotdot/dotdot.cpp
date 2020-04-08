@@ -12,7 +12,7 @@ int main(int argc, char *argv[]) {
   using namespace Dotdot;
 
   WorkingMode mode{WorkingMode::Resolve};
-  std::string dataDir{"~/Dotdot"};
+  std::string dataDir{"~/Dotdot/Dotfiles"};
   std::vector<std::string> rulesDir{};
   bool optShowHelp{false};
 
@@ -53,10 +53,12 @@ int main(int argc, char *argv[]) {
 	return 0;
   }
 
+  dataDir = Dotdot::NormalizePath(dataDir);
+
   switch (mode) {
-  case WorkingMode::Backup:Backup(rules, dataDir);
+  case WorkingMode::Backup:Backups(rules, dataDir);
 	break;
-  case WorkingMode::Restore:Restore(rules, dataDir);
+  case WorkingMode::Restore:Restores(rules, dataDir);
 	break;
   case WorkingMode::Resolve: std::cout << rules << "\n";
 	break;

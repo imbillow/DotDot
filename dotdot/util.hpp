@@ -8,7 +8,7 @@ std::ostream &operator<<(std::ostream &os, const std::vector<std::vector<T>> &v)
   using namespace std;
 
   if (v.empty()) {
-	return os<< "[]";
+	return os << "[]";
   }
 
   os << "[";
@@ -24,7 +24,7 @@ std::ostream &operator<<(std::ostream &os, const std::vector<T> &v) {
   using namespace std;
 
   if (v.empty()) {
-	return os<< "[]";
+	return os << "[]";
   }
 
   os << "[\n";
@@ -36,17 +36,19 @@ std::ostream &operator<<(std::ostream &os, const std::vector<T> &v) {
 using std::filesystem::path;
 namespace fs = std::filesystem;
 
-path NormalizePath(const std::string &ph) {
-  if (const auto home = getenv("HOME")) {
-	auto homePath = path{home};
-	path ret{};
-	if (ph.starts_with("~")) {
-	  ret = homePath.concat(ph.substr(1));
-	}
-	return homePath;
-  } else {
+path GetHomePath() {
+  auto home = getenv("HOME");
+  if (!home)
 	throw std::exception();
-  }
+  return path{home};
 }
+
+path NormalizePath(const std::string &ph) {
+  if (ph.starts_with("~")) {
+	return GetHomePath().concat(ph.substr(1));
+  }
+  return ph;
+}
+
 }
 #endif // UTIL_HPP

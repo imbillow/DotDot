@@ -1,6 +1,6 @@
 DotDot
 
-Backup My Dot files. (New Edition write with cpp)
+Backups My Dot files. (New Edition write with cpp)
 
 Resolve rule file like:
 

@@ -1,31 +1,58 @@
 #ifndef WORKING_H
 #define WORKING_H
 #include "rule.hpp"
+#include "files.hpp"
 
 namespace Dotdot {
-inline void Backup(const Rule &rule, const path &dst);
-inline void Restore(const Rule &rule, const path &src);
-inline void Backup(const Rules &rules, const path &dst);
-inline void Restore(const Rules &rules, const path &src);
 
-inline void Backup(const Rules &rules, const path &dst) {
+inline void Backups(const Rules &rules, const path &dst);
+inline void Restores(const Rules &rules, const path &src);
+
+inline void Backup(const ItemsType &items, const path &dst);
+inline void Restore(const ItemsType &items, const path &src);
+
+inline void Backups(const Rules &rules, const path &dst) {
   for (const auto &rule : rules) {
-	Backup(rule, dst);
+	Backup(rule.Items, dst / rule.Name);
   }
 }
 
-inline void Restore(const Rules &rules, const path &src) {
+inline void Restores(const Rules &rules, const path &src) {
   for (const auto &rule : rules) {
-	Restore(rule, src);
+	Restore(rule.Items, src / rule.Name);
   }
 }
-void Dotdot::Backup(const Rule &rule, const path &dst) {
-  // TODO
-  std::cout << "Not impl\n";
+
+inline void Backup(const ItemsType &items, const path &dst) {
+  auto home = GetHomePath();
+  Files::MappersType mappers{};
+  std::transform(items.begin(), items.end(), std::back_inserter(mappers),
+				 [&](const Item &it) {
+				   //    (from, to, type)
+				   return std::make_tuple(home / it.Path, dst / it.Path, it.Type);
+				 });
+  Files::Copy(mappers);
+
+  for (const auto &it : items) {
+	fs::remove_all(home / it.Path);
+  }
+
+  Files::SoftLink(mappers);
 }
-void Dotdot::Restore(const Rule &rule, const path &src) {
-  // TODO
-  std::cout << "Not impl\n";
+
+inline void Restore(const ItemsType &items, const path &src) {
+  auto home = GetHomePath();
+
+  for (const auto &it : items) {
+	fs::remove(home / it.Path);
+  }
+
+  Files::MappersType mappers{};
+  std::transform(items.begin(), items.end(), std::back_inserter(mappers),
+				 [&](const Item &it) {
+				   return std::make_tuple(src / it.Path, home / it.Path, it.Type);
+				 });
+  Files::Copy(mappers);
 }
 }
 #endif // WORKING_H
