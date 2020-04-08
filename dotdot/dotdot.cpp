@@ -53,7 +53,7 @@ int main(int argc, char *argv[]) {
 	return 0;
   }
 
-  dataDir = Dotdot::NormalizePath(dataDir);
+  dataDir = NormalizePath(dataDir).string();
 
   switch (mode) {
   case WorkingMode::Backup:Backups(rules, dataDir);

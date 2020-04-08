@@ -16,7 +16,7 @@ void ForeachMapper(const MappersType &mappers,
 void Copy(const MappersType &mappers);
 void SoftLink(const MappersType &mappers);
 
-void Copy(const MappersType &mappers) {
+inline void Copy(const MappersType &mappers) {
   ForeachMapper(mappers,
 				[](const path &src, const path &dst, const ItemType &type) {
 				  std::cout << src << " -> " << dst << "\n";
@@ -28,7 +28,7 @@ void Copy(const MappersType &mappers) {
 				});
 }
 
-void SoftLink(const MappersType &mappers) {
+inline void SoftLink(const MappersType &mappers) {
   ForeachMapper(mappers,
 				[](const path &link, const path &to, const ItemType &type) {
 				  if (type == ItemType::File) {
@@ -39,12 +39,12 @@ void SoftLink(const MappersType &mappers) {
 				});
 }
 
-void ForeachMapper(const MappersType &mappers,
-				   const std::function<void(const path &, const path &, const ItemType &)> &fn) {
-  for (const auto &[to, link, type] : mappers) {
+inline void ForeachMapper(const MappersType &mappers,
+                          const std::function<void(const path &, const path &, const ItemType &)> &fn) {
+  for (const auto &[from, to, type] : mappers) {
+	fs::create_directories(from.parent_path());
 	fs::create_directories(to.parent_path());
-	fs::create_directories(link.parent_path());
-	fn(to, link, type);
+	fn(from, to, type);
   }
 }
 

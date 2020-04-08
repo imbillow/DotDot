@@ -106,7 +106,7 @@ inline void ResolveDir(const path &dir, Rules &rulesOut) {
 
 inline Rule ResolveFile(const path &file) {
   Rule rule{.Name=file.stem().string(), .Items=ItemsType{}};
-  auto node = YAML::LoadFile(file);
+  auto node = YAML::LoadFile(file.string());
 
   ResolveNode(node, rule.Items);
 

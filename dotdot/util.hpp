@@ -1,5 +1,7 @@
 #ifndef UTIL_HPP
 #define UTIL_HPP
+// ReSharper disable once CppInconsistentNaming
+#define _CRT_SECURE_NO_WARNINGS
 #include "dotdot.h"
 
 namespace Dotdot {
@@ -36,14 +38,20 @@ std::ostream &operator<<(std::ostream &os, const std::vector<T> &v) {
 using std::filesystem::path;
 namespace fs = std::filesystem;
 
-path GetHomePath() {
-  auto home = getenv("HOME");
+inline path GetHomePath() {
+  char* home{};
+  #ifdef _WIN32
+  home = getenv("USERPROFILE");
+  #elif __linux__
+  home= getenv("HOME");
+  #endif
+
   if (!home)
 	throw std::exception();
   return path{home};
 }
 
-path NormalizePath(const std::string &ph) {
+inline path NormalizePath(const std::string &ph) {
   if (ph.starts_with("~")) {
 	return GetHomePath().concat(ph.substr(1));
   }
