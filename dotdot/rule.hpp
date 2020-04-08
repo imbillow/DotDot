@@ -110,11 +110,11 @@ inline Rule ResolveFile(const path &file) {
 
   ResolveNode(node, rule.Items);
 
-  #ifdef WINDOWS
+  #ifdef _WIN32
   if (node["windows"]) {
 	ResolveNode(node["windows"], rule.Items);
   }
-  #elif LINUX
+  #elif __linux__
   if (node["linux"]) {
 	ResolveNode(node["linux"], rule.Items);
   }
