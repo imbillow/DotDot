@@ -9,5 +9,7 @@
 #include <iterator>
 #include <unordered_set>
 #include <filesystem>
+#include <cstdlib>
+#include <exception>
 
 #endif

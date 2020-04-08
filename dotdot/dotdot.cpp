@@ -42,17 +42,23 @@ int main(int argc, char *argv[]) {
 
   std::vector<path> rulesPath{};
   std::transform(rulesDir.begin(), rulesDir.end(), std::back_inserter(rulesPath), [](const std::string &dir) {
-	return path{dir};
+	return NormalizePath(dir);
   });
 
+  std::cout << rulesPath << std::endl;
   const auto rules = ResolveDirs(rulesPath);
+
+  if (rules.empty()) {
+	std::cout << "Empty rules!\n";
+	return 0;
+  }
 
   switch (mode) {
   case WorkingMode::Backup:Backup(rules, dataDir);
 	break;
   case WorkingMode::Restore:Restore(rules, dataDir);
 	break;
-  case WorkingMode::Resolve:std::cout << rules << "\n";
+  case WorkingMode::Resolve: std::cout << rules << "\n";
 	break;
   default:
 	// ignore
