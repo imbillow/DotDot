@@ -19,9 +19,14 @@ void SoftLink(const MappersType &mappers);
 inline void Copy(const MappersType &mappers) {
   ForeachMapper(mappers,
 				[](const path &src, const path &dst, const ItemType &type) {
-                  if (!fs::exists(src)){
-                      return;
-                  }
+				  if (!fs::exists(src)) {
+					std::cout << "not exists, skip " << src << "\n";
+					return;
+				  }
+				  if (fs::exists(dst)) {
+					std::cout << "exists, skip " << dst << "\n";
+					return;
+				  }
 				  std::cout << src << " -> " << dst << " copied\n";
 
 				  if (type == ItemType::File) {
@@ -35,28 +40,37 @@ inline void Copy(const MappersType &mappers) {
 inline void SoftLink(const MappersType &mappers) {
   ForeachMapper(mappers,
 				[](const path &link, const path &to, const ItemType &type) {
-                  if (!fs::exists(to)){
-                    if (type==ItemType::File) {
-                      std::ofstream{to.c_str()};
-                    } else {
-                     fs::create_directories(to);
-                    }
-                  }
+				  if (fs::exists(link)) {
+					if (fs::is_symlink(link)) {
+					  std::cout << "link exists, skip " << link << "\n";
+					} else {
+					  std::cout << "something exists, skip " << link << "\n";
+					}
+					return;
+				  }
+
+				  if (!fs::exists(to)) {
+					if (type == ItemType::File) {
+					  std::ofstream{to.c_str()};
+					} else {
+					  fs::create_directories(to);
+					}
+				  }
 
 				  std::cout << link << " -> " << to << " linked\n";
 
 				  if (type == ItemType::File) {
 					fs::create_symlink(to, link);
-                     //CreateSymbolicLinkA(link.c_str(), to.c_str(), 0);
+					//CreateSymbolicLinkA(link.c_str(), to.c_str(), 0);
 				  } else {
 					fs::create_directory_symlink(to, link);
-                     //CreateSymbolicLinkA(link.c_str(), to.c_str(), 1);
+					//CreateSymbolicLinkA(link.c_str(), to.c_str(), 1);
 				  }
 				});
 }
 
 inline void ForeachMapper(const MappersType &mappers,
-                          const std::function<void(const path &, const path &, const ItemType &)> &fn) {
+						  const std::function<void(const path &, const path &, const ItemType &)> &fn) {
   for (const auto &[from, to, type] : mappers) {
 	fs::create_directories(from.parent_path());
 	fs::create_directories(to.parent_path());

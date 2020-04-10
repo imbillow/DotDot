@@ -124,6 +124,9 @@ inline Rule ResolveFile(const path &file) {
 }
 
 inline void ResolveNode(const YAML::Node &node, ItemsType &itemsOut) {
+  if (!node["root"]) {
+	return;
+  }
   const path root{node["root"].as<std::string>()};
   if (node["include"]) {
 	auto include = node["include"].as<std::vector<std::string >>();
