@@ -1,0 +1,4 @@
+root: .ssh
+include:
+  - config
+  - known_hosts

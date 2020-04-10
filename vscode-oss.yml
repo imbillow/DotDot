@@ -1,0 +1,5 @@
+root: ".config/Code - OSS/User"
+include:
+  - settings.json
+  - keybindings.json
+  - snippets/

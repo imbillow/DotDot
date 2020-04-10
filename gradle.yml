@@ -1,0 +1,4 @@
+root: .gradle
+include:
+  - gradle.properties
+  - init.d/

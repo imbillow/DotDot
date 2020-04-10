@@ -1,0 +1,4 @@
+root: .gnupg
+include:
+  - gpg.conf
+  - gpg-agent.conf
