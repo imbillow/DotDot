@@ -12,67 +12,55 @@ namespace Dotdot::Files {
     using MapperType = std::tuple<path, path, ItemType>;
     using MappersType = std::vector<MapperType>;
 
-    void ForeachMapper(const MappersType &mappers,
-                       const std::function<void(const path &, const path &, const ItemType &)> &fn);
+    inline bool Copy(const MappersType &mappers) {
+        for (const auto &[src, dst, type] : mappers) {
+            if (!fs::exists(src)) {
+                std::cout << "skipped " << src << " src not exists" << "\n";
+                return false;
+            }
+            if (fs::exists(dst)) {
+                std::cout << "skipped " << dst << " dst exists" << "\n";
+                return false;
+            }
 
-    void Copy(const MappersType &mappers);
+            fs::create_directories(src.parent_path());
+            fs::create_directories(dst.parent_path());
 
-    void SoftLink(const MappersType &mappers);
-
-    inline void Copy(const MappersType &mappers) {
-        ForeachMapper(mappers,
-                      [](const path &src, const path &dst, const ItemType &type) {
-                          if (!fs::exists(src)) {
-                              std::cout << "skipped " << src << "src not exists" << "\n";
-                              return;
-                          }
-                          if (fs::exists(dst)) {
-                              std::cout << "skipped " << dst << "dst exists" << "\n";
-                              return;
-                          }
-                          if (type == ItemType::File) {
-                              fs::copy_file(src, dst, fs::copy_options::skip_existing);
-                          } else {
-                              fs::copy(src, dst, fs::copy_options::recursive | fs::copy_options::skip_existing);
-                          }
-                          std::cout << "copied " << src << " -> " << dst << "\n";
-                      });
+            if (type == ItemType::File) {
+                fs::copy_file(src, dst, fs::copy_options::skip_existing);
+            } else {
+                fs::copy(src, dst, fs::copy_options::recursive | fs::copy_options::skip_existing);
+            }
+            std::cout << "copied " << src << " -> " << dst << "\n";
+        }
+        return true;
     }
 
     inline void SoftLink(const MappersType &mappers) {
-        ForeachMapper(mappers,
-                      [](const path &link, const path &to, const ItemType &type) {
-                          if (fs::exists(link)) {
-                              std::cout << link << " exists, skip " << link << "\n";
-                              return;
-                          }
+        for (const auto &[link, to, type] : mappers) {
+            if (fs::exists(link)) {
+                std::cout << link << " exists, skip " << link << "\n";
+                return;
+            }
 
-                          if (!fs::exists(to)) {
-                              if (type == ItemType::File) {
-                                  std::ofstream{to.c_str()};
-                              } else {
-                                  fs::create_directories(to);
-                              }
-                          }
+            if (!fs::exists(to)) {
+                if (type == ItemType::File) {
+                    // create a file
+                    std::ofstream{to};
+                } else {
+                    fs::create_directories(to);
+                }
+            }
 
-                          std::cout << link << " -> " << to << " linked\n";
-
-                          if (type == ItemType::File) {
-                              fs::create_symlink(to, link);
-                              //CreateSymbolicLinkA(link.c_str(), to.c_str(), 0);
-                          } else {
-                              fs::create_directory_symlink(to, link);
-                              //CreateSymbolicLinkA(link.c_str(), to.c_str(), 1);
-                          }
-                      });
-    }
-
-    inline void ForeachMapper(const MappersType &mappers,
-                              const std::function<void(const path &, const path &, const ItemType &)> &fn) {
-        for (const auto &[from, to, type] : mappers) {
-            fs::create_directories(from.parent_path());
+            fs::create_directories(link.parent_path());
             fs::create_directories(to.parent_path());
-            fn(from, to, type);
+
+            if (type == ItemType::File) {
+                fs::create_symlink(to, link);
+            } else {
+                fs::create_directory_symlink(to, link);
+            }
+            std::cout << "linked " << link << " -> " << to << "\n";
         }
     }
 

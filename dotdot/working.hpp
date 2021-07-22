@@ -17,12 +17,14 @@ namespace Dotdot {
     inline void Backups(const Rules &rules, const path &dst) {
         for (const auto &rule : rules) {
             Backup(rule.Items, dst / rule.Name);
+            std::cout << "\n";
         }
     }
 
     inline void Restores(const Rules &rules, const path &src) {
         for (const auto &rule : rules) {
             Restore(rule.Items, src / rule.Name);
+            std::cout << "\n";
         }
     }
 
@@ -34,13 +36,13 @@ namespace Dotdot {
                            //    (from, to, type)
                            return std::make_tuple(home / it.Path, dst / it.Path, it.Type);
                        });
-        Files::Copy(mappers);
+        if (Files::Copy(mappers)) {
+            for (const auto &it : items) {
+                fs::remove_all(home / it.Path);
+            }
 
-        for (const auto &it : items) {
-            fs::remove_all(home / it.Path);
+            Files::SoftLink(mappers);
         }
-
-        Files::SoftLink(mappers);
     }
 
     inline void Restore(const ItemsType &items, const path &src) {
